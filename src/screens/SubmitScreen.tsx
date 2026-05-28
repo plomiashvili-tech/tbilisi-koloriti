@@ -16,6 +16,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import * as Location from 'expo-location';
 import { VideoView, useVideoPlayer } from 'expo-video';
 import CategoryPicker from '../components/CategoryPicker';
+import RegionPicker from '../components/RegionPicker';
 import { createReport } from '../lib/reports';
 import { getDeviceId } from '../lib/deviceId';
 import { ReportCategory, RootStackParamList } from '../types';
@@ -28,6 +29,8 @@ export default function SubmitScreen() {
   const { mediaUri, mediaType } = route.params;
 
   const [category, setCategory] = useState<ReportCategory | null>(null);
+  const [street, setStreet] = useState('');
+  const [region, setRegion] = useState('');
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -62,6 +65,8 @@ export default function SubmitScreen() {
       await createReport({
         category,
         description,
+        street,
+        region,
         location,
         mediaUri,
         mediaType,
@@ -103,6 +108,25 @@ export default function SubmitScreen() {
         {/* Category */}
         <Text style={styles.sectionLabel}>Category *</Text>
         <CategoryPicker selected={category} onSelect={setCategory} />
+
+        {/* Street */}
+        <Text style={[styles.sectionLabel, { marginTop: 20, paddingHorizontal: 16 }]}>
+          Street name (optional)
+        </Text>
+        <TextInput
+          style={styles.input}
+          placeholder="e.g. Rustaveli Avenue, Agmashenebeli..."
+          placeholderTextColor="#aaa"
+          value={street}
+          onChangeText={setStreet}
+          maxLength={100}
+        />
+
+        {/* Region */}
+        <Text style={[styles.sectionLabel, { marginTop: 20, paddingHorizontal: 16 }]}>
+          Region / Neighbourhood (optional)
+        </Text>
+        <RegionPicker value={region} onChange={setRegion} />
 
         {/* Description */}
         <Text style={[styles.sectionLabel, { marginTop: 20, paddingHorizontal: 16 }]}>

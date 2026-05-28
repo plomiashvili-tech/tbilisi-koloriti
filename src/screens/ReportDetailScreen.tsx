@@ -90,9 +90,18 @@ export default function ReportDetailScreen() {
           </View>
         ) : null}
 
+        {/* Street / Region */}
+        {(report.street || report.region) ? (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Address</Text>
+            {report.street ? <Text style={styles.addressText}>🛣️  {report.street}</Text> : null}
+            {report.region ? <Text style={styles.addressText}>📌  {report.region}</Text> : null}
+          </View>
+        ) : null}
+
         {/* Location */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Location</Text>
+          <Text style={styles.sectionTitle}>GPS Coordinates</Text>
           <View style={styles.locationRow}>
             <Text style={styles.locationPin}>📍</Text>
             <Text style={styles.locationText}>
@@ -154,6 +163,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   description: { fontSize: 15, color: '#1D3557', lineHeight: 22 },
+  addressText: { fontSize: 14, color: '#1D3557', marginBottom: 4 },
   locationRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   locationPin: { fontSize: 16 },
   locationText: { fontSize: 14, color: '#457B9D', fontWeight: '500' },

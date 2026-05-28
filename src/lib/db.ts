@@ -7,12 +7,14 @@ let _db: SQLite.SQLiteDatabase | null = null;
 export async function getDb(): Promise<SQLite.SQLiteDatabase> {
   if (_db) return _db;
   _db = await SQLite.openDatabaseAsync('tbilisi_koloriti.db');
+  await _db.execAsync(`PRAGMA journal_mode = WAL;`);
   await _db.execAsync(`
-    PRAGMA journal_mode = WAL;
     CREATE TABLE IF NOT EXISTS reports (
       id          TEXT PRIMARY KEY,
       category    TEXT NOT NULL,
       description TEXT DEFAULT '',
+      street      TEXT DEFAULT '',
+      region      TEXT DEFAULT '',
       latitude    REAL NOT NULL,
       longitude   REAL NOT NULL,
       mediaPath   TEXT NOT NULL,
@@ -21,6 +23,13 @@ export async function getDb(): Promise<SQLite.SQLiteDatabase> {
       createdAt   INTEGER NOT NULL
     );
   `);
+  // Migrate existing installs that lack street/region columns
+  const ver = await _db.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
+  if ((ver?.user_version ?? 0) < 1) {
+    try { await _db.execAsync(`ALTER TABLE reports ADD COLUMN street TEXT DEFAULT ''`); } catch {}
+    try { await _db.execAsync(`ALTER TABLE reports ADD COLUMN region TEXT DEFAULT ''`); } catch {}
+    await _db.execAsync(`PRAGMA user_version = 1`);
+  }
   return _db;
 }
 

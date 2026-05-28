@@ -10,6 +10,8 @@ function rowToReport(row: any): Report {
     id: row.id,
     category: row.category as ReportCategory,
     description: row.description ?? '',
+    street: row.street ?? '',
+    region: row.region ?? '',
     location: { latitude: row.latitude, longitude: row.longitude },
     mediaUrl: row.mediaPath,
     mediaType: row.mediaType as 'photo' | 'video',
@@ -22,6 +24,8 @@ function rowToReport(row: any): Report {
 export async function createReport(data: {
   category: ReportCategory;
   description: string;
+  street: string;
+  region: string;
   location: { latitude: number; longitude: number };
   mediaUri: string;
   mediaType: 'photo' | 'video';
@@ -31,12 +35,14 @@ export async function createReport(data: {
   const id = makeId();
   const mediaPath = await copyMediaToStorage(data.mediaUri, data.mediaType);
   await db.runAsync(
-    `INSERT INTO reports (id, category, description, latitude, longitude, mediaPath, mediaType, status, createdAt)
-     VALUES (?, ?, ?, ?, ?, ?, ?, 'open', ?)`,
+    `INSERT INTO reports (id, category, description, street, region, latitude, longitude, mediaPath, mediaType, status, createdAt)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'open', ?)`,
     [
       id,
       data.category,
       data.description,
+      data.street,
+      data.region,
       data.location.latitude,
       data.location.longitude,
       mediaPath,

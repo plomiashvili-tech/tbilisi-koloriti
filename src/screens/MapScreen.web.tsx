@@ -22,7 +22,7 @@ function buildMapHtml(reports: Report[]): string {
           radius: 11, fillColor: "${cat?.color ?? '#8D99AE'}",
           color: "#fff", weight: 2, opacity: 1, fillOpacity: 0.9
         })
-        .bindTooltip("${cat?.icon ?? ''} ${cat?.label ?? r.category}", { permanent: false })
+        .bindTooltip("${cat?.icon ?? ''} ${cat?.label ?? r.category}${r.region ? ' · ' + r.region : ''}", { permanent: false })
         .on('click', function() { window.parent.postMessage({type:'report',id:"${r.id}"},'*'); })
         .addTo(map);
       `;
@@ -103,9 +103,13 @@ export default function MapScreen() {
         <Text style={styles.badgeText}>{reports.length} reports</Text>
       </View>
 
-      <View style={styles.webNote}>
-        <Text style={styles.webNoteText}>📱 Install the mobile app to submit reports</Text>
-      </View>
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => navigation.navigate('Camera')}
+        activeOpacity={0.85}
+      >
+        <Text style={styles.fabIcon}>+</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -128,19 +132,13 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   badgeText: { color: '#fff', fontWeight: '600', fontSize: 13 },
-  webNote: {
-    position: 'absolute',
-    bottom: 24,
-    alignSelf: 'center',
-    backgroundColor: '#fff',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-  webNoteText: { fontSize: 13, color: '#1D3557', fontWeight: '600' },
+  fab: {
+    position: 'absolute', bottom: 32, right: 24,
+    width: 60, height: 60, borderRadius: 30,
+    backgroundColor: '#E63946',
+    justifyContent: 'center', alignItems: 'center',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3, shadowRadius: 6, elevation: 8,
+  } as any,
+  fabIcon: { fontSize: 32, color: '#fff', lineHeight: 36 },
 });
