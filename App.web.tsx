@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { TouchableOpacity, Text } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
@@ -22,6 +22,9 @@ import type { AuthUser } from './src/lib/auth.web';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
+
+// Global ref so the popstate handler can reach the navigator
+const navigationRef = createNavigationContainerRef<RootStackParamList>();
 
 function Tabs({ user, signOut }: { user: AuthUser; signOut: () => void }) {
   return (
@@ -65,11 +68,30 @@ export default function App() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [checked, setChecked] = useState(false);
 
+  // Seed admin + load session
   useEffect(() => {
     ensureAdmin().then(() => {
       setUser(getCurrentUser());
       setChecked(true);
     });
+  }, []);
+
+  // Intercept browser back button — always return to Main instead of leaving the app
+  useEffect(() => {
+    // Push a sentinel entry so the very first back press pops our state
+    window.history.pushState({ koloriti: true }, '');
+
+    function onPopState() {
+      // Re-push so the next back press also gets caught
+      window.history.pushState({ koloriti: true }, '');
+      // Navigate to Main (map) via the navigation ref
+      if (navigationRef.isReady()) {
+        navigationRef.navigate('Main');
+      }
+    }
+
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
   }, []);
 
   function signOut() {
@@ -85,7 +107,7 @@ export default function App() {
 
   return (
     <AuthContext.Provider value={{ user, signOut, refreshUser }}>
-      <NavigationContainer>
+      <NavigationContainer ref={navigationRef}>
         <StatusBar style="light" />
         <Stack.Navigator
           screenOptions={{
