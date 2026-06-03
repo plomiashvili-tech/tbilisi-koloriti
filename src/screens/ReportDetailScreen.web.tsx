@@ -3,7 +3,7 @@ import {
   View, Text, StyleSheet, ScrollView, ActivityIndicator,
   TouchableOpacity,
 } from 'react-native';
-import { useRoute, RouteProp } from '@react-navigation/native';
+import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import { getReport, submitFixVerification, rateReport, updateReportStatus, getUserVerificationCount, getUserRatingCount } from '../lib/reports';
 import { getMediaUrl } from '../lib/mediaStore.web';
 import { awardPoints } from '../lib/auth.web';
@@ -197,6 +197,7 @@ function StarRating({
 // ─── Main screen ─────────────────────────────────────────────────────────────
 export default function ReportDetailScreen() {
   const route = useRoute<Route>();
+  const navigation = useNavigation();
   const { user, refreshUser } = useAuth();
   const [report, setReport] = useState<Report | null>(null);
   const [loading, setLoading] = useState(true);
@@ -442,6 +443,15 @@ export default function ReportDetailScreen() {
               </Text>
             </View>
           )}
+
+          {/* Back button */}
+          <TouchableOpacity
+            style={styles.backBtn}
+            onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Main' as never)}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.backBtnTxt}>← Back to Map</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
 
@@ -527,6 +537,15 @@ const styles = StyleSheet.create({
   starFilled: { color: '#FFB703' },
   ratingMeta: { fontSize: 13, color: '#8D99AE', marginTop: 2 },
   ratingYours: { fontSize: 12, color: '#457B9D', marginTop: 4 },
+
+  // Back button
+  backBtn: {
+    marginTop: 32, marginBottom: 8,
+    paddingVertical: 14, borderRadius: 12,
+    borderWidth: 1, borderColor: '#e0e0e0',
+    alignItems: 'center', backgroundColor: '#fff',
+  },
+  backBtnTxt: { color: '#1D3557', fontSize: 15, fontWeight: '600' },
 
   // Camera overlay
   cameraOverlay: { backgroundColor: '#000', zIndex: 999 } as any,
